@@ -42,6 +42,10 @@ Correções e exemplos reproduzíveis são bem-vindos. Ao abrir uma issue ou pul
 
 Quando possível, valide a alteração em uma instância de teste e indique a versão testada.
 
+## Licença
+
+A documentação original deste repositório está sob [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Os exemplos de código estão sob a licença [MIT](LICENSE-CODE). Veja [LICENSE](LICENSE) para o escopo e as ressalvas sobre materiais de terceiros.
+
 ## Referências oficiais
 
 - [Manual do Apache Guacamole 1.6.0](https://guacamole.apache.org/doc/gug/)
