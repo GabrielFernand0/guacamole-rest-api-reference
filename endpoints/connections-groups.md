@@ -1,179 +1,58 @@
-# Grupos de Conexões
+# Grupos de conexões
 
-## Introdução
+Grupos organizam conexões e outros grupos em uma árvore. O grupo raiz usa o identificador `ROOT`.
 
-Grupos de conexões permitem organizar múltiplas conexões dentro do Apache Guacamole.
-Eles ajudam a estruturar o acesso a diferentes servidores e serviços de forma hierárquica e controlada.
+## Consultar a árvore de grupos
 
----
-
-## Listar Grupos de Conexões
-
-**Endpoint:**
-
-```
-GET /api/session/data/{dataSource}/connectionGroups/{id}/children
+```http
+GET /api/session/data/{dataSource}/connectionGroups/{identifier}/tree
+Guacamole-Token: <TOKEN>
 ```
 
-**Parâmetros:**
+Use `ROOT` para consultar a árvore a partir da raiz. A resposta é um objeto de grupo com seus descendentes, sujeito às permissões do usuário.
 
-| Campo      | Tipo   | Obrigatório | Descrição                             |
-| ---------- | ------ | ----------- | ------------------------------------- |
-| dataSource | string | ✅           | Fonte de dados (ex: `postgresql`)     |
-| id         | string | ✅           | ID do grupo de conexões (0 para root) |
+## Listar grupos
 
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X GET "http://SEU_GUACAMOLE/api/session/data/postgresql/connectionGroups/0/children" \
-  -H "Guacamole-Token: SEU_TOKEN"
+```http
+GET /api/session/data/{dataSource}/connectionGroups
+Guacamole-Token: <TOKEN>
 ```
 
-**Exemplo de requisição (Python):**
+A resposta é um objeto JSON indexado pelos identificadores dos grupos.
 
-```python
-import requests
+## Criar um grupo
 
-url = "http://SEU_GUACAMOLE/api/session/data/postgresql/connectionGroups/0/children"
-headers = {"Guacamole-Token": "SEU_TOKEN"}
-
-response = requests.get(url, headers=headers)
-print(response.json())
-```
-
-**Resposta esperada (200 OK):**
-
-```json
-[
-  {
-    "identifier": "1",
-    "name": "Servidor Web",
-    "type": "ORGANIZATIONAL",
-    "childConnections": [],
-    "childConnectionGroups": []
-  }
-]
-```
-
----
-
-## Criar Grupo de Conexões
-
-**Endpoint:**
-
-```
+```http
 POST /api/session/data/{dataSource}/connectionGroups
+Content-Type: application/json
+Guacamole-Token: <TOKEN>
 ```
 
-**Parâmetros (JSON):**
-
-| Campo            | Tipo   | Obrigatório | Descrição                             |
-| ---------------- | ------ | ----------- | ------------------------------------- |
-| name             | string | ✅           | Nome do grupo de conexões             |
-| type             | string | ✅           | Tipo: `ORGANIZATIONAL` ou `BALANCING` |
-| parentIdentifier | string | ✅           | ID do grupo pai (0 para root)         |
-
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X POST "http://SEU_GUACAMOLE/api/session/data/postgresql/connectionGroups" \
-  -H "Content-Type: application/json" \
-  -H "Guacamole-Token: SEU_TOKEN" \
-  -d '{"name":"Novo Grupo","type":"ORGANIZATIONAL","parentIdentifier":"0"}'
-```
-
-**Resposta esperada (201 Created):**
+Exemplo de corpo:
 
 ```json
 {
-  "identifier": "2",
-  "name": "Novo Grupo",
+  "name": "Operações",
   "type": "ORGANIZATIONAL",
-  "childConnections": [],
-  "childConnectionGroups": []
+  "parentIdentifier": "ROOT",
+  "attributes": {}
 }
 ```
 
----
+Os tipos de grupo incluem `ORGANIZATIONAL` e `BALANCING`. Campos e validações podem depender do provedor de autenticação.
 
-## Atualizar Grupo de Conexões
+## Atualizar ou excluir
 
-**Endpoint:**
-
-```
-PUT /api/session/data/{dataSource}/connectionGroups/{id}
-```
-
-**Parâmetros (JSON):**
-
-| Campo | Tipo   | Obrigatório | Descrição          |
-| ----- | ------ | ----------- | ------------------ |
-| name  | string | ✅           | Novo nome do grupo |
-| type  | string | ✅           | Tipo do grupo      |
-
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X PUT "http://SEU_GUACAMOLE/api/session/data/postgresql/connectionGroups/2" \
-  -H "Content-Type: application/json" \
-  -H "Guacamole-Token: SEU_TOKEN" \
-  -d '{"name":"Grupo Atualizado","type":"ORGANIZATIONAL"}'
+```http
+PUT /api/session/data/{dataSource}/connectionGroups/{identifier}
+DELETE /api/session/data/{dataSource}/connectionGroups/{identifier}
+Guacamole-Token: <TOKEN>
 ```
 
-**Resposta esperada (200 OK):**
+Envie o objeto atualizado no corpo do `PUT`. Uma atualização ou exclusão bem-sucedida pode retornar sem corpo (HTTP 204).
 
-```json
-{
-  "identifier": "2",
-  "name": "Grupo Atualizado",
-  "type": "ORGANIZATIONAL"
-}
-```
+## Observações
 
----
-
-## Deletar Grupo de Conexões
-
-**Endpoint:**
-
-```
-DELETE /api/session/data/{dataSource}/connectionGroups/{id}
-```
-
-**Parâmetros:**
-
-| Campo | Tipo   | Obrigatório | Descrição             |
-| ----- | ------ | ----------- | --------------------- |
-| id    | string | ✅           | ID do grupo a deletar |
-
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X DELETE "http://SEU_GUACAMOLE/api/session/data/postgresql/connectionGroups/2" \
-  -H "Guacamole-Token: SEU_TOKEN"
-```
-
-**Resposta esperada:**
-
-* `204 No Content` – Grupo deletado com sucesso.
-
----
-
-## Códigos de Resposta Comuns
-
-| Código | Significado             |
-| ------ | ----------------------- |
-| 200    | Requisição bem-sucedida |
-| 201    | Criado com sucesso      |
-| 204    | Sem conteúdo            |
-| 400    | Requisição inválida     |
-| 401    | Não autorizado          |
-| 404    | Não encontrado          |
-
----
-
-## Boas Práticas
-
-* Evitar deletar grupos que ainda possuem conexões ou subgrupos ativos.
-* Utilizar IDs corretos do `dataSource` e do grupo pai.
-* Manter nomes de grupos claros e organizados para facilitar administração.
+- `{dataSource}` deve ser o identificador retornado pelo endpoint de autenticação.
+- O endpoint `/tree` retorna a estrutura hierárquica; ele não se chama `/children`.
+- Não use `0` como identificador do grupo raiz: use `ROOT`.

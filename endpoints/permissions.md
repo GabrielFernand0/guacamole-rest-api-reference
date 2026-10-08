@@ -1,198 +1,52 @@
 # Permissões
 
-O Apache Guacamole permite atribuir e revogar permissões de acesso a conexões e grupos de conexões para usuários e grupos.
+Permissões são consultadas e alteradas no subrecurso `permissions` de um usuário ou grupo de usuários. Alterações usam PATCH com uma lista de operações JSON Patch; não são feitas com POST ou DELETE nesse endpoint.
 
----
+## Consultar permissões de um usuário
 
-## Atribuir Permissões de Sistema a um Usuário
-
-**Endpoint:**  
-```
-POST /api/session/data/{dataSource}/users/{username}/permissions
+```http
+GET /api/session/data/{dataSource}/users/{username}/permissions
+Guacamole-Token: <TOKEN>
 ```
 
-**Parâmetros:**
+As permissões efetivas de um usuário também podem ser consultadas em `/users/{username}/effectivePermissions`.
 
-| Campo       | Tipo   | Obrigatório | Descrição                          |
-|-------------|--------|-------------|------------------------------------|
-| dataSource  | string | ✅           | Fonte de dados (ex: `postgresql`)  |
-| username    | string | ✅           | Nome de usuário                    |
+## Conceder permissão de sistema
 
-**Corpo da Requisição:**
+```http
+PATCH /api/session/data/{dataSource}/users/{username}/permissions
+Content-Type: application/json
+Guacamole-Token: <TOKEN>
+```
+
+Corpo para conceder permissão de leitura do sistema:
+
 ```json
-{
-  "permissions": [
-    {
-      "type": "SYSTEM",
-      "permission": "READ"
-    }
-  ]
-}
+[
+  {
+    "op": "add",
+    "path": "/systemPermissions",
+    "value": "READ"
+  }
+]
 ```
 
-**Exemplo de requisição (cURL):**
-```bash
-curl -X POST "http://SEU_GUACAMOLE/api/session/data/postgresql/users/usuario1/permissions" \
-  -H "Guacamole-Token: SEU_TOKEN" \
-  -d '{
-    "permissions": [
-      {
-        "type": "SYSTEM",
-        "permission": "READ"
-      }
-    ]
-  }'
-```
+## Remover permissão
 
-**Resposta esperada (200 OK):**
+Use a mesma rota e altere `op` para `remove`:
+
 ```json
-{
-  "status": "success"
-}
+[
+  {
+    "op": "remove",
+    "path": "/systemPermissions",
+    "value": "READ"
+  }
+]
 ```
 
----
+## Permissões sobre objetos
 
-## Revogar Permissões de Sistema de um Usuário
+O caminho do patch identifica o tipo de permissão e o objeto. Por exemplo, permissões de conexão usam `/connectionPermissions/{identifier}`; permissões de grupo de conexões usam `/connectionGroupPermissions/{identifier}`. Valores válidos dependem do tipo de objeto e incluem permissões como `READ`, `UPDATE`, `DELETE` e `ADMINISTER`.
 
-**Endpoint:**  
-```
-DELETE /api/session/data/{dataSource}/users/{username}/permissions
-```
-
-**Parâmetros:**
-
-| Campo       | Tipo   | Obrigatório | Descrição                          |
-|-------------|--------|-------------|------------------------------------|
-| dataSource  | string | ✅           | Fonte de dados (ex: `postgresql`)  |
-| username    | string | ✅           | Nome de usuário                    |
-
-**Corpo da Requisição:**
-```json
-{
-  "permissions": [
-    {
-      "type": "SYSTEM",
-      "permission": "READ"
-    }
-  ]
-}
-```
-
-**Exemplo de requisição (cURL):**
-```bash
-curl -X DELETE "http://SEU_GUACAMOLE/api/session/data/postgresql/users/usuario1/permissions" \
-  -H "Guacamole-Token: SEU_TOKEN" \
-  -d '{
-    "permissions": [
-      {
-        "type": "SYSTEM",
-        "permission": "READ"
-      }
-    ]
-  }'
-```
-
-**Resposta esperada (200 OK):**
-```json
-{
-  "status": "success"
-}
-```
-
----
-
-## Atribuir Grupos de Conexões a um Usuário
-
-**Endpoint:**  
-```
-POST /api/session/data/{dataSource}/users/{username}/connectionGroups
-```
-
-**Parâmetros:**
-
-| Campo       | Tipo   | Obrigatório | Descrição                          |
-|-------------|--------|-------------|------------------------------------|
-| dataSource  | string | ✅           | Fonte de dados (ex: `postgresql`)  |
-| username    | string | ✅           | Nome de usuário                    |
-
-**Corpo da Requisição:**
-```json
-{
-  "connectionGroups": [
-    {
-      "identifier": "group1",
-      "permissions": ["READ"]
-    }
-  ]
-}
-```
-
-**Exemplo de requisição (cURL):**
-```bash
-curl -X POST "http://SEU_GUACAMOLE/api/session/data/postgresql/users/usuario1/connectionGroups" \
-  -H "Guacamole-Token: SEU_TOKEN" \
-  -d '{
-    "connectionGroups": [
-      {
-        "identifier": "group1",
-        "permissions": ["READ"]
-      }
-    ]
-  }'
-```
-
-**Resposta esperada (200 OK):**
-```json
-{
-  "status": "success"
-}
-```
-
----
-
-## Revogar Grupos de Conexões de um Usuário
-
-**Endpoint:**  
-```
-DELETE /api/session/data/{dataSource}/users/{username}/connectionGroups
-```
-
-**Parâmetros:**
-
-| Campo       | Tipo   | Obrigatório | Descrição                          |
-|-------------|--------|-------------|------------------------------------|
-| dataSource  | string | ✅           | Fonte de dados (ex: `postgresql`)  |
-| username    | string | ✅           | Nome de usuário                    |
-
-**Corpo da Requisição:**
-```json
-{
-  "connectionGroups": [
-    {
-      "identifier": "group1",
-      "permissions": ["READ"]
-    }
-  ]
-}
-```
-
-**Exemplo de requisição (cURL):**
-```bash
-curl -X DELETE "http://SEU_GUACAMOLE/api/session/data/postgresql/users/usuario1/connectionGroups" \
-  -H "Guacamole-Token: SEU_TOKEN" \
-  -d '{
-    "connectionGroups": [
-      {
-        "identifier": "group1",
-        "permissions": ["READ"]
-      }
-    ]
-  }'
-```
-
-**Resposta esperada (200 OK):**
-```json
-{
-  "status": "success"
-}
+Os mesmos recursos de permissões estão disponíveis para grupos de usuários em `/userGroups/{identifier}/permissions`. O provedor de autenticação precisa permitir a operação.
