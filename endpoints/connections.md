@@ -1,461 +1,86 @@
 # Conexões
 
-## Introdução
+Uma conexão representa um destino remoto e seu protocolo, como SSH, RDP ou VNC. Os dados retornados e as operações permitidas dependem do provedor de autenticação e das permissões do usuário.
 
-Conexões no Apache Guacamole representam acessos a servidores ou serviços remotos, como RDP, VNC ou SSH.
-A API permite criar, atualizar, listar e deletar conexões, bem como associá-las a grupos e usuários.
+## Listar conexões
 
----
-
-## Listar Conexões
-
-**Endpoint:**
-
-```
+```http
 GET /api/session/data/{dataSource}/connections
+Guacamole-Token: <TOKEN>
 ```
 
-**Parâmetros:**
-
-| Campo      | Tipo   | Obrigatório | Descrição                         |
-| ---------- | ------ | ----------- | --------------------------------- |
-| dataSource | string | ✅           | Fonte de dados (ex: `postgresql`) |
-
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X GET "http://SEU_GUACAMOLE/api/session/data/postgresql/connections" \
-  -H "Guacamole-Token: SEU_TOKEN"
-```
-
-**Exemplo de requisição (Python):**
-
-```python
-import requests
-
-url = "http://SEU_GUACAMOLE/api/session/data/postgresql/connections"
-headers = {"Guacamole-Token": "SEU_TOKEN"}
-
-response = requests.get(url, headers=headers)
-print(response.json())
-```
-
-**Resposta esperada (200 OK):**
+A resposta é um objeto JSON indexado pelo identificador da conexão, não uma lista JSON. Exemplo reduzido:
 
 ```json
-[
-  {
+{
+  "1": {
     "identifier": "1",
-    "name": "Servidor Web",
+    "name": "Servidor SSH",
+    "parentIdentifier": "ROOT",
     "protocol": "ssh",
     "parameters": {
-        "hostname": "192.168.1.10",
-        "port": "22",
-        "username": "usuario"
-    }
-  }
-]
-```
-
----
-
-## Criar Conexão
-
-**Endpoint:**
-
-```
-POST /api/session/data/{dataSource}/connections
-```
-
-**Parâmetros (JSON):**
-
-| Campo            | Tipo   | Obrigatório | Descrição                            |
-| ---------------- | ------ | ----------- | ------------------------------------ |
-| name             | string | ✅           | Nome da conexão                      |
-| parentIdentifier | string | ✅           | ID do grupo de conexões              |
-| protocol         | string | ✅           | Protocolo: `ssh`, `rdp`, `vnc`, etc. |
-| parameters       | object | ✅           | Parâmetros específicos do protocolo  |
-
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X POST "http://SEU_GUACAMOLE/api/session/data/postgresql/connections" \
-  -H "Content-Type: application/json" \
-  -H "Guacamole-Token: SEU_TOKEN" \
-  -d '{
-        "name":"Conexão SSH",
-        "parentIdentifier":"1",
-        "protocol":"ssh",
-        "parameters":{
-            "hostname":"192.168.1.10",
-            "port":"22",
-            "username":"usuario"
-        }
-      }'
-```
-
-**Resposta esperada (201 Created):**
-
-```json
-{
-  "identifier": "2",
-  "name": "Conexão SSH",
-  "protocol": "ssh",
-  "parameters": {
-      "hostname": "192.168.1.10",
+      "hostname": "host.example",
       "port": "22",
       "username": "usuario"
-  }
-}
-```
-
----
-
-## Atualizar Conexão
-
-**Endpoint:**
-
-```
-PUT /api/session/data/{dataSource}/connections/{id}
-```
-
-**Parâmetros (JSON):**
-
-| Campo      | Tipo   | Obrigatório | Descrição               |
-| ---------- | ------ | ----------- | ----------------------- |
-| name       | string | ✅           | Novo nome da conexão    |
-| protocol   | string | ✅           | Protocolo da conexão    |
-| parameters | object | ✅           | Parâmetros do protocolo |
-
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X PUT "http://SEU_GUACAMOLE/api/session/data/postgresql/connections/2" \
-  -H "Content-Type: application/json" \
-  -H "Guacamole-Token: SEU_TOKEN" \
-  -d '{
-        "name":"Conexão SSH Atualizada",
-        "protocol":"ssh",
-        "parameters":{
-            "hostname":"192.168.1.11",
-            "port":"22",
-            "username":"novo_usuario"
-        }
-      }'
-```
-
-**Resposta esperada (200 OK):**
-
-```json
-{
-  "identifier": "2",
-  "name": "Conexão SSH Atualizada",
-  "protocol": "ssh",
-  "parameters": {
-      "hostname": "192.168.1.11",
-      "port": "22",
-      "username": "novo_usuario"
-  }
-}
-```
-
----
-
-## Deletar Conexão
-
-**Endpoint:**
-
-```
-DELETE /api/session/data/{dataSource}/connections/{id}
-```
-
-**Parâmetros:**
-
-| Campo | Tipo   | Obrigatório | Descrição               |
-| ----- | ------ | ----------- | ----------------------- |
-| id    | string | ✅           | ID da conexão a deletar |
-
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X DELETE "http://SEU_GUACAMOLE/api/session/data/postgresql/connections/2" \
-  -H "Guacamole-Token: SEU_TOKEN"
-```
-
-**Resposta esperada:**
-
-* `204 No Content` – Conexão deletada com sucesso.
-
----
-
-## Códigos de Resposta Comuns
-
-| Código | Significado             |
-| ------ | ----------------------- |
-| 200    | Requisição bem-sucedida |
-| 201    | Criado com sucesso      |
-| 204    | Sem conteúdo            |
-| 400    | Requisição inválida     |
-| 401    | Não autorizado          |
-| 404    | Não encontrado          |
-
----
-
-## Boas Práticas
-
-* Sempre verificar o grupo pai (`parentIdentifier`) antes de criar conexões.
-* Manter os parâmetros do protocolo corretos para evitar falhas de autenticação.
-* Nomear conexões de forma clara para facilitar a administração.
-
-
-
-
-
------------------------------------------------------------------
-
-
-
-# Conexões
-
-## Introdução
-
-Conexões no Apache Guacamole representam acessos a servidores ou serviços remotos, como RDP, VNC ou SSH.
-A API permite criar, atualizar, listar e deletar conexões, bem como associá-las a grupos e usuários.
-
----
-
-## Listar Conexões
-
-**Endpoint:**
-
-```
-GET /api/session/data/{dataSource}/connections
-```
-
-**Parâmetros:**
-
-| Campo      | Tipo   | Obrigatório | Descrição                         |
-| ---------- | ------ | ----------- | --------------------------------- |
-| dataSource | string | ✅           | Fonte de dados (ex: `postgresql`) |
-
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X GET "http://SEU_GUACAMOLE/api/session/data/postgresql/connections" \
-  -H "Guacamole-Token: SEU_TOKEN"
-```
-
-**Exemplo de requisição (Python):**
-
-```python
-import requests
-
-url = "http://SEU_GUACAMOLE/api/session/data/postgresql/connections"
-headers = {"Guacamole-Token": "SEU_TOKEN"}
-
-response = requests.get(url, headers=headers)
-print(response.json())
-```
-
-**Resposta esperada (200 OK):**
-
-```json
-[
-  {
-    "identifier": "1",
-    "name": "Servidor Web",
-    "protocol": "ssh",
-    "parameters": {
-        "hostname": "192.168.1.10",
-        "port": "22",
-        "username": "usuario"
     }
   }
-]
+}
 ```
 
----
+## Consultar uma conexão
 
-## Criar Conexão
-
-**Endpoint:**
-
+```http
+GET /api/session/data/{dataSource}/connections/{identifier}
+Guacamole-Token: <TOKEN>
 ```
+
+## Criar uma conexão
+
+```http
 POST /api/session/data/{dataSource}/connections
+Content-Type: application/json
+Guacamole-Token: <TOKEN>
 ```
 
-**Parâmetros (JSON):**
-
-| Campo             | Tipo   | Obrigatório | Descrição                                             |
-| ----------------- | ------ | ----------- | ----------------------------------------------------- |
-| name              | string | ✅           | Nome da conexão                                       |
-| parentIdentifier  | string | ✅           | ID do grupo de conexões                               |
-| protocol          | string | ✅           | Protocolo: `ssh`, `rdp`, `vnc`, etc.                  |
-| parameters        | object | ✅           | Parâmetros específicos do protocolo                   |
-| attributes        | object | ❌           | Atributos opcionais, como `max-connections`, `weight` |
-| tags              | array  | ❌           | Lista de tags para organização                        |
-| activeConnections | int    | ❌           | Número máximo de conexões simultâneas                 |
-| readOnly          | bool   | ❌           | Indica se a conexão é somente leitura                 |
-
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X POST "http://SEU_GUACAMOLE/api/session/data/postgresql/connections" \
-  -H "Content-Type: application/json" \
-  -H "Guacamole-Token: SEU_TOKEN" \
-  -d '{
-        "name":"Conexão SSH",
-        "parentIdentifier":"1",
-        "protocol":"ssh",
-        "parameters":{
-            "hostname":"192.168.1.10",
-            "port":"22",
-            "username":"usuario"
-        },
-        "attributes":{
-            "max-connections":5,
-            "weight":10
-        },
-        "tags":["dev","ssh"],
-        "activeConnections":1,
-        "readOnly":false
-      }'
-```
-
-**Resposta esperada (201 Created):**
+Exemplo de corpo para uma conexão SSH:
 
 ```json
 {
-  "identifier": "2",
-  "name": "Conexão SSH",
+  "name": "Servidor SSH",
+  "parentIdentifier": "ROOT",
   "protocol": "ssh",
   "parameters": {
-      "hostname": "192.168.1.10",
-      "port": "22",
-      "username": "usuario"
+    "hostname": "host.example",
+    "port": "22",
+    "username": "usuario"
   },
-  "attributes":{
-      "max-connections":5,
-      "weight":10
-  },
-  "tags":["dev","ssh"],
-  "activeConnections":1,
-  "readOnly":false
+  "attributes": {}
 }
 ```
 
----
+`ROOT` identifica o grupo de conexões raiz. Para outro grupo, use seu identificador. Os parâmetros de conexão variam por protocolo; consulte o schema e os parâmetros suportados pela sua instalação. A criação bem-sucedida devolve o objeto criado, incluindo o identificador atribuído pelo provedor.
 
-## Atualizar Conexão
+## Atualizar uma conexão
 
-**Endpoint:**
-
-```
-PUT /api/session/data/{dataSource}/connections/{id}
-```
-
-**Parâmetros (JSON):**
-
-| Campo             | Tipo   | Obrigatório | Descrição                             |
-| ----------------- | ------ | ----------- | ------------------------------------- |
-| name              | string | ✅           | Novo nome da conexão                  |
-| protocol          | string | ✅           | Protocolo da conexão                  |
-| parameters        | object | ✅           | Parâmetros do protocolo               |
-| attributes        | object | ❌           | Atributos opcionais                   |
-| tags              | array  | ❌           | Lista de tags                         |
-| activeConnections | int    | ❌           | Número máximo de conexões simultâneas |
-| readOnly          | bool   | ❌           | Indica se a conexão é somente leitura |
-
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X PUT "http://SEU_GUACAMOLE/api/session/data/postgresql/connections/2" \
-  -H "Content-Type: application/json" \
-  -H "Guacamole-Token: SEU_TOKEN" \
-  -d '{
-        "name":"Conexão SSH Atualizada",
-        "protocol":"ssh",
-        "parameters":{
-            "hostname":"192.168.1.11",
-            "port":"22",
-            "username":"novo_usuario"
-        },
-        "attributes":{
-            "max-connections":10,
-            "weight":20
-        },
-        "tags":["prod","ssh"],
-        "activeConnections":2,
-        "readOnly":true
-      }'
+```http
+PUT /api/session/data/{dataSource}/connections/{identifier}
+Content-Type: application/json
+Guacamole-Token: <TOKEN>
 ```
 
-**Resposta esperada (200 OK):**
+Envie a representação atualizada da conexão aceita pelo seu provedor. Uma atualização bem-sucedida não precisa retornar um corpo.
 
-```json
-{
-  "identifier": "2",
-  "name": "Conexão SSH Atualizada",
-  "protocol": "ssh",
-  "parameters": {
-      "hostname": "192.168.1.11",
-      "port": "22",
-      "username": "novo_usuario"
-  },
-  "attributes":{
-      "max-connections":10,
-      "weight":20
-  },
-  "tags":["prod","ssh"],
-  "activeConnections":2,
-  "readOnly":true
-}
+## Excluir uma conexão
+
+```http
+DELETE /api/session/data/{dataSource}/connections/{identifier}
+Guacamole-Token: <TOKEN>
 ```
 
----
+Uma resposta bem-sucedida não tem corpo (HTTP 204). Confirme o identificador e as permissões antes de excluir.
 
-## Deletar Conexão
+## Observações
 
-**Endpoint:**
-
-```
-DELETE /api/session/data/{dataSource}/connections/{id}
-```
-
-**Parâmetros:**
-
-| Campo | Tipo   | Obrigatório | Descrição               |
-| ----- | ------ | ----------- | ----------------------- |
-| id    | string | ✅           | ID da conexão a deletar |
-
-**Exemplo de requisição (cURL):**
-
-```bash
-curl -X DELETE "http://SEU_GUACAMOLE/api/session/data/postgresql/connections/2" \
-  -H "Guacamole-Token: SEU_TOKEN"
-```
-
-**Resposta esperada:**
-
-* `204 No Content` – Conexão deletada com sucesso.
-
----
-
-## Códigos de Resposta Comuns
-
-| Código | Significado             |
-| ------ | ----------------------- |
-| 200    | Requisição bem-sucedida |
-| 201    | Criado com sucesso      |
-| 204    | Sem conteúdo            |
-| 400    | Requisição inválida     |
-| 401    | Não autorizado          |
-| 404    | Não encontrado          |
-
----
-
-## Boas Práticas
-
-* Sempre verificar o grupo pai (`parentIdentifier`) antes de criar conexões.
-* Manter os parâmetros do protocolo corretos para evitar falhas de autenticação.
-* Nomear conexões de forma clara para facilitar a administração.
+- `{dataSource}` é um identificador retornado pela autenticação, como `postgresql`; não é o nome do protocolo.
+- Coleções de recursos do Guacamole são normalmente objetos JSON indexados por identificador.
+- Os campos disponíveis podem variar de acordo com o protocolo e o provedor.

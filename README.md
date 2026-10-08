@@ -1,66 +1,50 @@
-# Apache Guacamole REST API - Documentação não oficial
+# Apache Guacamole REST API — referência comunitária
 
-Documentação **não oficial** da API REST do Apache Guacamole, criada com base em:
-- Testes práticos
-- Uso real em produção
-- Referências da comunidade
+Referência **não oficial** para integrar aplicações e scripts ao Apache Guacamole pela API HTTP usada pelo cliente web. O conteúdo reúne rotas, exemplos e observações práticas; não substitui o manual oficial nem a validação na instância em uso.
 
----
+## Compatibilidade
 
-## Objetivo
-- Fornecer uma referência rápida e clara para desenvolvedores e administradores.
-- Facilitar a integração e automação do Guacamole via API.
-- Centralizar exemplos e explicações úteis.
+As versões registradas como testadas neste projeto são **1.5.4, 1.5.5 e 1.6.0**. O comportamento e os campos disponíveis podem variar conforme a versão e o provedor de autenticação (por exemplo, PostgreSQL, MySQL ou LDAP). O valor de `dataSource` deve vir de `availableDataSources` na resposta de autenticação.
 
----
+Esta documentação é independente e **não é mantida nem endossada pelo projeto Apache Guacamole**. Para integrações específicas de extensões, consulte também a documentação da própria extensão.
 
-## Versões testadas
-Esta documentação foi construída a partir de uso e validação real da API nas seguintes versões do Apache Guacamole:
-- **1.5.4**
-- **1.5.5**
-- **1.6.0**
+## Comece por aqui
 
-Embora outros releases possam funcionar de forma semelhante, todos os exemplos e endpoints descritos aqui foram confirmados como funcionais nessas versões.  
-Para versões futuras, alguns detalhes podem mudar, e a contribuição da comunidade será bem-vinda para manter esta documentação atualizada.
+1. Obtenha um token usando [Autenticação](endpoints/authentication.md).
+2. Use o token no cabeçalho `Guacamole-Token` nas chamadas de API.
+3. Consulte os [exemplos com cURL](examples/curl.md) ou [Python](examples/python.md).
+4. Escolha o recurso:
 
----
+| Recurso | Referência |
+| --- | --- |
+| Conexões | [Conexões](endpoints/connections.md) |
+| Grupos de conexões | [Grupos de conexões](endpoints/connections-groups.md) |
+| Usuários | [Usuários](endpoints/users.md) |
+| Grupos de usuários | [Grupos de usuários](endpoints/user-groups.md) |
+| Permissões | [Permissões](endpoints/permissions.md) |
+| Histórico | [Histórico](endpoints/history.md) |
+| Túneis da sessão | [Túneis](endpoints/tunnels.md) |
+| Recursos de extensões | [Extensões](endpoints/extensions.md) |
 
-## Aviso
-> ⚠️ Esta documentação **não é oficial** e não é mantida pelo projeto Apache Guacamole.  
-> Créditos à [documentação de referência](https://github.com/ridvanaltun/guacamole-rest-api-documentation).
+## URL base e autenticação
 
----
+A URL base é a raiz da aplicação Guacamole, incluindo o caminho de contexto quando aplicável, por exemplo `https://guac.example.com/guacamole`. Assim, o endpoint de autenticação fica em `{URL_BASE}/api/tokens`.
 
-## Common Responses
-Esta seção descreve os códigos de resposta mais comuns retornados pela API:
- _______________________________
-| Código | Significado          |
-|--------|----------------------|
-| 200    | A request succeeded  |
-| 204    | No content           |
-| 400    | Bad request          |
-| 401    | Unauthorized         |
-| 404    | Not found            |
-|________|______________________|
+Prefira HTTPS e envie o token no cabeçalho `Guacamole-Token`. Evite incluir credenciais ou tokens em exemplos versionados, logs, histórico do shell ou URLs compartilhadas. Use uma conta com somente as permissões necessárias.
 
----
+## Contribuições
 
-## Estrutura dos Endpoints
-Cada arquivo contém a descrição detalhada dos métodos, parâmetros, exemplos de requisição e resposta para cada recurso da API:
+Correções e exemplos reproduzíveis são bem-vindos. Ao abrir uma issue ou pull request, informe:
 
-- **[Autenticação](endpoints/autentication.md)**
-- **[Conexões](endpoints/connections.md)**
-- **[Grupos de Conexões](endpoints/connections-groups.md)**
-- **[Usuários](endpoints/users.md)**
-- **[Grupos de Usuários](endpoints/user-groups.md)**
-- **[Permissões](endpoints/permissions.md)**
-- **[Histórico](endpoints/history.md)**
-- **[Túneis](endpoints/tunnels.md)**
+- versão do Guacamole e provedor de autenticação usados;
+- endpoint, método e objetivo da chamada;
+- resposta sanitizada, sem tokens, senhas, endereços ou nomes reais de ambientes.
 
----
+Quando possível, valide a alteração em uma instância de teste e indique a versão testada.
 
-## Exemplos de Uso
-Para facilitar a implementação, há exemplos práticos de chamadas à API em diferentes formatos:
+## Referências oficiais
 
-- **[Exemplos com cURL](examples/curl.md)**
-- **[Exemplos com Python](examples/python.md)**
+- [Manual do Apache Guacamole 1.6.0](https://guacamole.apache.org/doc/gug/)
+- [Documentação das APIs oficiais do Guacamole](https://guacamole.apache.org/api-documentation/)
+- [Código-fonte oficial do cliente e das extensões](https://github.com/apache/guacamole-client)
+- [Autenticação por token no código-fonte](https://github.com/apache/guacamole-client/blob/1.6.0/guacamole/src/main/java/org/apache/guacamole/rest/auth/TokenRESTService.java)
